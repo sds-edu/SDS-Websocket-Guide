@@ -57,7 +57,6 @@ If the server supports it, it responds with a `101 Switching Protocols` status c
 
 From that exact moment, the HTTP protocol is abandoned. The connection stays open, and the two machines begin speaking a lightweight, binary/text WebSocket protocol over the same TCP connection.
 
-
 ![Upgrade HTTP to Websocket](/images/websocket_upgrade.png)
 *Source: [Mohan Manavalan via Dev.to](https://dev.to/_mohanmurali/comparison-of-http-and-websocket-protocols-55pd)*
 
@@ -87,32 +86,79 @@ In the JavaScript ecosystem, you'll encounter two main ways to build real-time a
 
 ## Build a Simple Chat Application
 
-This project is a monorepo consisting of a Node.js server and a React client. We use the native `ws` library on the backend and the browser's `WebSocket` API on the frontend.
+This project consiss of a Node.js server and a React client. We use the native `ws` library on the backend and the browser's `WebSocket` API on the frontend.
+
+## Getting Started
+
+Follow these steps to get your development environment up and running.
 
 ### Prerequisites
 
-- [Node.js LTS](https://nodejs.org/en/download)
+* **Node.js:** Ensure you have the [LTS version](https://nodejs.org/en/download) installed.
+* **Starter Repository:** Clone the [SDS Kit Chat App](https://github.com/sds-edu/SDS-Kit-Chat-App) repository.
+
+---
+
+#### 1. Clone & Navigate
+
+First, pull the code to your local machine and move into the project directory:
+
+```bash
+git clone https://github.com/sds-edu/SDS-Kit-Chat-App
+cd SDS-Kit-Chat-App
+```
+
+#### 2. Install Dependencies
+
+Install the required packages for the project.
+
+```bash
+npm install
+```
+
+#### 3. Configure Environment Variables
+
+The server requires specific configuration to run. Create a `.env` file inside the `server` directory:
+
+**Path:** `server/.env`
+
+```env
+PORT=8080
+NODE_ENV=development
+```
+
+#### 4. Launch the App
+
+Once configured, you can start the development server:
+
+```bash
+npm run dev
+```
+
+---
 
 ### Initialize the WebSocket Server
 
 On the server, we use the `ws` package. First, we create an HTTP server and then attach a `WebSocketServer` to it. This allows the server to handle both standard HTTP requests and WebSocket upgrades on the same port.
 
-"server/server.js"
-
-`TODO: [Websocket Server]`
+In the repository, find the file `server/server.js`. Locate the `TODO: [Websocket Server]` block. Copy the code snippet below to initialize an HTTP and WebSocket server.
 
 ```javascript
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
 ```
 
-### Step 2: Handle Connections and Broadcasting
+---
 
-The server's job is to listen for new connections and "broadcast" any received messages to every connected client.
+### Connections and Broadcasting
 
-"server/server.js"
+#### Update Number of Online Users
 
-`TODO [Function to broadcast]`
+The server must listen for new connections and "broadcast" the updated number of online users to every connected client.
+
+The `wss.clients` property is a Set containing all currently connected WebSocket instances. We iterate through this Set and send the user count only to clients whose connection is currently `OPEN`.
+
+Locate the `TODO [Function to broadcast]` section in the file and copy the code below.
 
 ```javascript
 const broadcastUserCount = () => {
@@ -130,17 +176,24 @@ const broadcastUserCount = () => {
 }
 ```
 
-`TODO [On message]`
+* `wss.clients.forEach((client) => { ... })`: Iterates through the server's internal set of all currently connected client instances.
+* `client.readyState === WebSocket.OPEN`: Acts as a safety check to ensure the server only attempts to send data to clients with fully active, open connections (ignoring those in the process of closing).
+
+#### Manage Incoming Text Messages
+
+When a client sends a message, the server acts as a relay. It parses the incoming JSON, adds a server-side timestamp to ensure consistency, and broadcasts the enriched payload to everyone (including the sender).
+
+Locate the `TODO [Message]` section in the file and copy the code below.
+
 ```javascript
 wss.on("connection", (ws) => {
-  // rest of the code...
+  // ...
 
   ws.on("message", (data) => {
     try {
       const message = JSON.parse(data);
       console.log("Received:", message);
 
-      // Add server-side timestamp and broadcast the message
       const payload = JSON.stringify({
         ...message,
         timestamp: new Date().toISOString(),
@@ -158,89 +211,145 @@ wss.on("connection", (ws) => {
 })
 ```
 
-`TODO [On close]`
+* `wss.on("connection", (ws) => { ... })`: Listens for a new client connecting to the WebSocket server.
+* `ws.on("message", (data) => { ... })`: Sets up a listener on the individual client's connection to capture any data they send to the server.
+* `JSON.stringify({ ...message, timestamp: new Date().toISOString() })`: Takes the parsed message, injects a server-generated timestamp for consistency, and converts the whole object back into a string so it can be transmitted.
+
+#### Handling Disconnections
+
+It's critical to clean up when a user leaves. When the `close` event fires, we log the event and trigger another broadcast so all remaining users see the updated participant count.
+
+Locate the `TODO [Disconnect]` section in the file and copy the code below.
+
 ```javascript
 wss.on("connection", (ws) => {
-  // rest of the code...
+  // ...
 
   ws.on("close", () => {
     console.log("User disconnected. Total:", wss.clients.size);
+
     // Broadcast the updated count on disconnect
     broadcastUserCount();
   });
 })
 ```
 
-### Step 3: Connect from the Frontend
+* `ws.on("close", () => { ... })`: Sets up a listener that triggers automatically the moment this specific client disconnects.
 
-In React, we manage the WebSocket lifecycle using a [custom hook](https://react.dev/learn/reusing-logic-with-custom-hooks).
-<explain what a custom hook is>
-We establish the connection when the user "joins" and clean it up when the component unmounts.
+---
 
-"client/src/hooks/useWebSocket.js"
+### Connect from the Frontend
 
-`TODO [Set count and message]`
+In React, to manage a persistent, external connection like a WebSocket we use React Hooks.
+
+Hooks are special built-in JavaScript functions that allow you to extract complex, behind-the-scenes logic into modular, reusable functions, keeping your main UI components clean and focused entirely on rendering what the user sees.
+
+In this application, we've created a custom hook called `useWebSocket`. It encapsulates all the complex logic of opening a connection, listening for incoming messages, and updating the chat state.
+
+Inside our custom hook, we rely heavily on React's built-in `useEffect` hook. We use it to automatically establish the WebSocket connection the exact moment our chat component "mounts" (appears on the screen).
+
+Find the file `client/src/hooks/useWebSocket.js`. Locate the `TODO [Set user count and message]` section and copy the code below.
+
 ```javascript
 useEffect(() => {
-  // rest of the code...
+  // ...
 
   socket.onmessage = (event) => {
-      const data = JSON.parse(event.data);
+    const data = JSON.parse(event.data);
 
-      // Handle different message types
-      if (data.type === 'user_count') {
-        setUserCount(data.count);
-      } else {
-        // Chat message
-        setMessages((prev) => [...prev, data]);
-      }
+    // Handle different message types
+    if (data.type === 'user_count') {
+      setUserCount(data.count);
+    } else {
+      // Chat message: append to the existing list
+      setMessages((prev) => [...prev, data]);
+    }
+  };
+
+  socket.onclose = () => {
+      console.log('WebSocket Disconnected');
+      setIsConnected(false);
+      setUserCount(0);
     };
 
-  // rest of the code...
+    socket.onerror = (error) => {
+      console.error('WebSocket Error:', error);
+    };
 
-}, [url]);
+  // ...
+
+}, [url, currentUsername]);
 ```
+
+* `socket.onmessage = (event) => { ... }`: Sets up a listener that triggers automatically every time the client receives new data from the server.
+* `if (data.type === 'user_count') { setUserCount(data.count); }`: Checks the payload to see if the server is sending a system update. If it's a user count update, it updates the React state to display the current number of participants.
+* `setMessages((prev) => [...prev, data])`: It takes the previous list of messages and creates a new array with the incoming message appended to the end, triggering React to re-render the chat window.
+* `socket.onclose = () => { ... }`: Listens for the connection severing - whether the server went down, the network dropped, or the connection was manually closed.
+* `socket.onerror = (error) => { ... }`: Catches any unexpected connection failures and logs them to the browser's console.
 
 ---
 
 ### Running the App
 
-1. **Install Dependencies:**
-   Run the following in the root directory:
-   ```bash
-   npm install
-   ```
+Execute the following command in your terminal.
 
-2. **Configure Environment:**
-   Create a `.env` file in the `server` directory:
-   ```env
-   PORT=8080
-   NODE_ENV=development
-   ```
+```bash
+npm run dev
+```
 
-3. **Run in Development Mode:**
-   ```bash
-   npm run dev
-   ```
+* Client: [http://localhost:5173](http://localhost:5173)
+* Server: [ws://localhost:8080](ws://localhost:8080)
 
-   *   **Client:** [http://localhost:5173](http://localhost:5173)
-   *   **Server:** [ws://localhost:8080](ws://localhost:8080)
+If you see the home screen, great job! You've successfully built a real-time server.
 
-![Home](/images/home.png)
-If you see home screen way to go!
+#### Observe
 
-Open simultaneous windows to mock users and explore!
-Ensure to click leave room to cleanly terminate
+* Open simultaneous browser windows (or incognito tabs) to mock multiple users.
+* Ensure you click "Leave Room" to cleanly terminate connections.
+* Keep an eye on your terminal logs to watch the messages route in real-time and observe the user count fluctuate!
 
-Observe logs to see messages and user counts
+---
 
-### Clean up
-<how to clean up resources>
+### Terminating
+
+Properly closing connections is essential to prevent memory leaks and ensure the server has an accurate user count.
+
+**Client-Side Cleanup:**
+In our `useWebSocket` hook, the `useEffect` returns a cleanup function:
+
+```javascript
+return () => {
+  socket.close();
+};
+```
+
+When a user clicks "Leave" or closes the browser tab, the component unmounts, and `socket.close()` is called. This immediately notifies the server so it can update the participant list for everyone else.
+
+The server is configured to handle "graceful shutdowns." If you stop the server, it will first notify all connected clients that the server is closing before shutting down the underlying HTTP listener.
+
+```javascript
+const shutdown = () => {
+  wss.close(() => {
+    server.close(() => {
+      process.exit(0);
+    });
+  });
+};
+
+process.on("SIGINT", shutdown);
+process.on("SIGTERM", shutdown);
+```
+
+Woohoo! 🥳 You have just implemented your first chat application.
 
 ---
 
 ## References
 
-* **MDN Web Docs: The WebSocket API** - [developer.mozilla.org/en-US/docs/Web/API/WebSocket_API](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket_API)
-* **`ws` Library Repository** - [github.com/websockets/ws](https://github.com/websockets/ws)
-* **RFC 6455: The WebSocket Protocol** - [datatracker.ietf.org/doc/html/rfc6455](https://datatracker.ietf.org/doc/html/rfc6455)
+* [MDN Web Docs: The WebSocket API](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket_API)
+* [ws Library Repository](https://github.com/websockets/ws)
+* [RFC 6455: The WebSocket Protocol](https://datatracker.ietf.org/doc/html/rfc6455)
+
+## AI Declaration
+
+Some parts of this code were structured and generated with the assistance of `Gemini 3.1 Pro` . All code snippets used were reviewed, implemented, and tested by the teaching team to ensure accuracy and functionality.
