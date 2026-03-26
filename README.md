@@ -6,8 +6,6 @@ The Software Design School (SDS) Toolbox is a collection of guides and resources
 
 In this guide, we will explore the fundamentals of **real-time, bidirectional communication** using WebSockets in a Node.js environment. By the end of this tutorial, you will understand how WebSockets differ from standard web traffic and how to build a real-time chat application from scratch.
 
-![chat](/images/chat.png)
-
 ---
 
 ## HTTP vs. WebSockets
@@ -87,6 +85,8 @@ In the JavaScript ecosystem, you'll encounter two main ways to build real-time a
 ## Build a Simple Chat Application
 
 This project consiss of a Node.js server and a React client. We use the native `ws` library on the backend and the browser's `WebSocket` API on the frontend.
+
+![chat](/images/chat.png)
 
 ## Getting Started
 
@@ -240,13 +240,13 @@ wss.on("connection", (ws) => {
 
 ### Connect from the Frontend
 
-In React, to manage a persistent, external connection like a WebSocket we use React Hooks.
+In React, to manage a persistent, external connection like a WebSocket we use [React Hooks](https://www.w3schools.com/react/react_hooks.asp).
 
 Hooks are special built-in JavaScript functions that allow you to extract complex, behind-the-scenes logic into modular, reusable functions, keeping your main UI components clean and focused entirely on rendering what the user sees.
 
-In this application, we've created a custom hook called `useWebSocket`. It encapsulates all the complex logic of opening a connection, listening for incoming messages, and updating the chat state.
+In this application, we've created a [custom hook](https://www.w3schools.com/react/react_customhooks.asp) called `useWebSocket`. It encapsulates all the complex logic of opening a connection, listening for incoming messages, and updating the chat state.
 
-Inside our custom hook, we rely heavily on React's built-in `useEffect` hook. We use it to automatically establish the WebSocket connection the exact moment our chat component "mounts" (appears on the screen).
+Inside our custom hook, we rely heavily on React's built-in [`useEffect`](https://www.w3schools.com/react/react_useeffect.asp) hook. We use it to automatically establish the WebSocket connection the exact moment our chat component "mounts" (appears on the screen).
 
 Find the file `client/src/hooks/useWebSocket.js`. Locate the `TODO [Set user count and message]` section and copy the code below.
 
@@ -306,7 +306,8 @@ If you see the home screen, great job! You've successfully built a real-time ser
 
 #### Observe
 
-* Open simultaneous browser windows (or incognito tabs) to mock multiple users.
+* Open simultaneous browser windows (or incognito tabs) to mock multiple users. Notice how the user count is updated.
+* Send messaged and receive them!
 * Ensure you click "Leave Room" to cleanly terminate connections.
 * Keep an eye on your terminal logs to watch the messages route in real-time and observe the user count fluctuate!
 
@@ -348,6 +349,7 @@ Woohoo! 🥳 You have just implemented your first chat application.
 
 ## References
 
+* [WebSockets vs HTTP](https://ably.com/topic/websockets-vs-http)
 * [MDN Web Docs: The WebSocket API](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket_API)
 * [ws Library Repository](https://github.com/websockets/ws)
 * [RFC 6455: The WebSocket Protocol](https://datatracker.ietf.org/doc/html/rfc6455)
