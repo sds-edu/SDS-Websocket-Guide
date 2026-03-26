@@ -1,4 +1,4 @@
-# SDS Toolbox: Real-Time Communication with WebSockets in Node.js
+# SDS Toolbox: Real-Time Communication with WebSockets
 
 ## Introduction
 
@@ -301,6 +301,8 @@ npm run dev
 * Server: [ws://localhost:8080](ws://localhost:8080)
 
 If you see the home screen, great job! You've successfully built a real-time server.
+
+![Home](/images/home.png)
 
 #### Observe
 
