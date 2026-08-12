@@ -145,13 +145,13 @@ const wss = new WebSocketServer({ server });
 ```
 
 #### 5. Launch the App
-Once configured, you can start the development server.
+Once configured, start the development server from the **root** directory of your project.
 
 ```bash
 npm run dev
 ```
 
-If your terminal should output something similar to the following, it means your dev server is running successfully:
+If your terminal outputs something similar to the following, it means your dev server is running successfully:
 
 ```text
 [1]   VITE v8.2.1  ready in 463 ms
@@ -160,6 +160,8 @@ If your terminal should output something similar to the following, it means your
 [1]   ➜  Network: use --host to expose
 [0] Server running at http://localhost:8080
 ```
+
+Once verified, press ```Ctrl + C``` (or ```Cmd + C``` on macOS) to terminate the client and server.
 
 ---
 
@@ -304,7 +306,7 @@ useEffect(() => {
 
 ### Running the App
 
-Execute the following command in your terminal.
+Similar to before, start the development server from the root directory of your project.
 
 ```bash
 npm run dev
