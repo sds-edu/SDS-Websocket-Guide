@@ -161,7 +161,7 @@ If your terminal outputs something similar to the following, it means your dev s
 [0] Server running at http://localhost:8080
 ```
 
-Once verified, press ```Ctrl + C``` (or ```Cmd + C``` on macOS) to terminate the client and server.
+Once verified, press `Ctrl + C` to terminate the client and server.
 
 ---
 
@@ -321,7 +321,7 @@ If you see the home screen, great job! You've successfully built a real-time ser
 
 #### Observe
 
-* Open multiple browser windows (or incognito tabs) using ```http://localhost:5173``` to mock multiple users. Notice how the user count is updated.
+* Open multiple browser windows (or incognito tabs) using `http://localhost:5173` to mock multiple users. Notice how the user count is updated.
 * Send messages and receive them!
 * Ensure you click "Leave Room" to cleanly terminate connections.
 * Keep an eye on your terminal logs to watch the messages route in real-time and observe the user count fluctuate!
