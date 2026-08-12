@@ -4,9 +4,13 @@
 
 The Software Design School (SDS) Toolbox is a collection of guides and resources to help you get started with the essential tools and technologies used in modern software engineering.
 
-In this guide, we will explore the fundamentals of **real-time, bidirectional communication** using WebSockets in a Node.js environment. By the end of this tutorial, you will understand how WebSockets differ from standard web traffic and how to build a real-time chat application from scratch.
+In this guide, we will explore the fundamentals of **real-time, bidirectional communication** using WebSockets in a Node.js environment and build a real-time chat application from scratch.
 
-![chat](/images/chat.png)
+By the end of this tutorial, you will be able to:
+- Contrast how WebSockets differ from standard web traffic (HTTP)
+- Initialize a native WebSocket server
+- Manage client connections for broadcasting and graceful disconnections
+- Integrate WebSockets within a React frontend client
 
 ---
 
@@ -86,9 +90,11 @@ In the JavaScript ecosystem, you'll encounter two main ways to build real-time a
 
 ## Build a Simple Chat Application
 
-This project consiss of a Node.js server and a React client. We use the native `ws` library on the backend and the browser's `WebSocket` API on the frontend.
+This project consists of a Node.js server and a React client. We use the native `ws` library on the backend and the browser's `WebSocket` API on the frontend.
 
-## Getting Started
+![chat](/images/chat.png)
+
+### Getting Started
 
 Follow these steps to get your development environment up and running.
 
@@ -97,7 +103,7 @@ Follow these steps to get your development environment up and running.
 * **Node.js:** Ensure you have the [LTS version](https://nodejs.org/en/download) installed.
 * **Starter Repository:** Clone the [SDS Kit Chat App](https://github.com/sds-edu/SDS-Kit-Chat-App) repository.
 
----
+### Setup
 
 #### 1. Clone & Navigate
 
@@ -127,17 +133,7 @@ PORT=8080
 NODE_ENV=development
 ```
 
-#### 4. Launch the App
-
-Once configured, you can start the development server:
-
-```bash
-npm run dev
-```
-
----
-
-### Initialize the WebSocket Server
+#### 4. Initialize the WebSocket Server
 
 On the server, we use the `ws` package. First, we create an HTTP server and then attach a `WebSocketServer` to it. This allows the server to handle both standard HTTP requests and WebSocket upgrades on the same port.
 
@@ -147,6 +143,25 @@ In the repository, find the file `server/server.js`. Locate the `TODO: [Websocke
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
 ```
+
+#### 5. Launch the App
+Once configured, start the development server from the **root** directory of your project.
+
+```bash
+npm run dev
+```
+
+If your terminal outputs something similar to the following, it means your dev server is running successfully:
+
+```text
+[1]   VITE v8.2.1  ready in 463 ms
+[1] 
+[1]   ➜  Local:   http://localhost:5173/
+[1]   ➜  Network: use --host to expose
+[0] Server running at http://localhost:8080
+```
+
+Once verified, press `Ctrl + C` to terminate the client and server.
 
 ---
 
@@ -168,11 +183,11 @@ const broadcastUserCount = () => {
       timestamp: new Date().toISOString(),
     });
 
-    wss.clients.forEach((client) => {
-      if (client.readyState === WebSocket.OPEN) {
-        client.send(payload);
-      }
-    });
+  wss.clients.forEach((client) => {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(payload);
+    }
+  });
 }
 ```
 
@@ -240,13 +255,13 @@ wss.on("connection", (ws) => {
 
 ### Connect from the Frontend
 
-In React, to manage a persistent, external connection like a WebSocket we use React Hooks.
+In React, to manage a persistent, external connection like a WebSocket we use [React Hooks](https://www.w3schools.com/react/react_hooks.asp).
 
 Hooks are special built-in JavaScript functions that allow you to extract complex, behind-the-scenes logic into modular, reusable functions, keeping your main UI components clean and focused entirely on rendering what the user sees.
 
-In this application, we've created a custom hook called `useWebSocket`. It encapsulates all the complex logic of opening a connection, listening for incoming messages, and updating the chat state.
+In this application, we've created a [custom hook](https://www.w3schools.com/react/react_customhooks.asp) called `useWebSocket`. It encapsulates all the complex logic of opening a connection, listening for incoming messages, and updating the chat state.
 
-Inside our custom hook, we rely heavily on React's built-in `useEffect` hook. We use it to automatically establish the WebSocket connection the exact moment our chat component "mounts" (appears on the screen).
+Inside our custom hook, we rely heavily on React's built-in [`useEffect`](https://www.w3schools.com/react/react_useeffect.asp) hook. We use it to automatically establish the WebSocket connection the exact moment our chat component "mounts" (appears on the screen).
 
 Find the file `client/src/hooks/useWebSocket.js`. Locate the `TODO [Set user count and message]` section and copy the code below.
 
@@ -270,11 +285,11 @@ useEffect(() => {
       console.log('WebSocket Disconnected');
       setIsConnected(false);
       setUserCount(0);
-    };
+  };
 
-    socket.onerror = (error) => {
-      console.error('WebSocket Error:', error);
-    };
+  socket.onerror = (error) => {
+    console.error('WebSocket Error:', error);
+  };
 
   // ...
 
@@ -291,7 +306,7 @@ useEffect(() => {
 
 ### Running the App
 
-Execute the following command in your terminal.
+Similar to before, start the development server from the root directory of your project.
 
 ```bash
 npm run dev
@@ -306,7 +321,8 @@ If you see the home screen, great job! You've successfully built a real-time ser
 
 #### Observe
 
-* Open simultaneous browser windows (or incognito tabs) to mock multiple users.
+* Open multiple browser windows (or incognito tabs) using `http://localhost:5173` to mock multiple users. Notice how the user count is updated.
+* Send messages and receive them!
 * Ensure you click "Leave Room" to cleanly terminate connections.
 * Keep an eye on your terminal logs to watch the messages route in real-time and observe the user count fluctuate!
 
@@ -348,10 +364,11 @@ Woohoo! 🥳 You have just implemented your first chat application.
 
 ## References
 
+* [WebSockets vs HTTP](https://ably.com/topic/websockets-vs-http)
 * [MDN Web Docs: The WebSocket API](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket_API)
 * [ws Library Repository](https://github.com/websockets/ws)
 * [RFC 6455: The WebSocket Protocol](https://datatracker.ietf.org/doc/html/rfc6455)
 
 ## AI Declaration
 
-Some parts of this code were structured and generated with the assistance of `Gemini 3.1 Pro` . All code snippets used were reviewed, implemented, and tested by the teaching team to ensure accuracy and functionality.
+Some parts of this code were structured and generated with the assistance of `Gemini 3.1 Pro`. All code snippets used were reviewed, implemented, and tested by the teaching team to ensure accuracy and functionality.
